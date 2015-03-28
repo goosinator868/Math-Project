@@ -344,4 +344,157 @@ public final class MatrixMath {
         return values;
     }
 
+    public static double[][] jacobi(Matrix mat, double[] b,
+        double tol) {
+
+        //returns tolerance & x
+        //make lu and d matrices
+        Matrix lu = findL(mat).add(findU(mat));
+        Matrix d = findD(mat);
+        Matrix dInv = new Matrix(d);
+
+
+        //inverse of d
+        for (int i = 0; i < mat.getRows(); i++) {
+            for (int j = 0; j < mat.getColumns(); j++) {
+                if(i == j) {
+                    dInv.set(i, j, 1 / dInv.get(i, j));
+                }
+            }
+        }
+
+        //make b a matrix
+        double[][] temp = new double[b.length][1];
+        for (int i = 0; i < b.length; i++) {
+            temp[i][0] = b[i];
+        }
+
+        Matrix bo = new Matrix(temp);
+        Matrix xo = new Matrix(mat.getRows(), 1);
+        //right side of formula
+        int count = 0;
+        Matrix x;
+        do {
+            x = dInv.multiply((lu.multiply(xo)).add(bo));
+            double tolTemp = getMagnitude(x.subtract(xo));
+            count++;
+            xo = x;
+        } while (tolTemp > tol);
+
+        //make matrix x into an array
+        double[][] xFinal = new double[1][x.getRows()];
+        for (int i = 0; i < x.getRows(); i++) {
+            xFinal[0][i] = x.get(i, 0);
+        }
+        double[] iteration = new double[1];
+        iteration[0] = count;
+        double[][] returnVals = {{xFinal}, {count}};
+
+        return returnVals;
+    }
+
+    public static double[][] gauss_seidel(Matrix mat, double[] b,
+        double tol) {
+        Matrix ld = findL(mat).add(findD(mat));
+        Matrix u = findU(mat);
+
+        //make b a matrix
+        double[][] temp = new double[b.length][1];
+        for (int i = 0; i < b.length; i++) {
+            temp[i][0] = b[i];
+        }
+
+        Matrix bo = new Matrix(temp);
+        Matrix xo = new Matrix(mat.getRows(), 1);
+
+        Matrix right;
+
+        double[] x = new double[b.length];
+        int count = 0;
+        do {
+            //Solve (L+D)x = right
+            right = (u.multiply(xo).add(bo));
+            count++;
+            for (int i = 0; i < x.length; i++) {
+                double temp = right.get(i, 0);
+
+                for (int k = 0; k < i; k++) {
+                    temp -= ld.get(i, k) * x[k];
+                }
+                temp /= ld.get(i, i);
+                x[i] = temp;
+            }
+            temp = new double[x.length][1];
+            for (int i = 0; i < x.length; i++) {
+                temp[i][0] = x[i];
+            }
+
+            x = new Matrix(temp);
+
+            double tolTemp = getMagnitude(x.subtract(xo));
+            count++;
+            xo = x;
+        } while (tolTemp > tol);
+
+        //make matrix x into an array
+        double[][] xFinal = new double[1][x.getRows()];
+        for (int i = 0; i < x.getRows(); i++) {
+            xFinal[0][i] = x.get(i, 0);
+        }
+        double[] iteration = new double[1];
+        iteration[0] = count;
+        double[][] returnVals = {{xFinal}, {count}};
+
+        return returnVals;
+
+    }
+
+    private static Matrix l findL(Matrix mat) {
+        int row = mat.getRows();
+        int col = mat.getColumns();
+        Matrix l = new Matrix(mat);
+
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (i >= j) {
+                    l.set(i, j, 0);
+                }
+            }
+        }
+
+        return l;
+    }
+
+    private static Matrix u findU(Matrix mat) {
+        int row = mat.getRows();
+        int col = mat.getColumns();
+        Matrix u = new Matrix(mat);
+
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (i <= j) {
+                    u.set(i, j, 0);
+                }
+            }
+        }
+
+        return u;
+    }
+
+    private static Matrix d findD(Matrix mat) {
+        int row = mat.getRows();
+        int col = mat.getColumns();
+        Matrix d = new Matrix(mat);
+
+        for (int i = 0; i < row; i++) {
+            for(int j = 0; j <col; j++) {
+                if (i == j) {
+                    d.set(i, j, 0);
+                }
+            }
+        }
+
+        return d;
+    }
+
 }
