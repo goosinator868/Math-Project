@@ -52,7 +52,8 @@ public final class Driver {
 
             switch (choice) {
                 case 1:
-                    System.out.println("Not available yet!");
+                    System.out.print("[0, 1, 2, 3]");
+                    System.out.println(Arrays.toString(inputParser("[0, 1, 2, 3]")));
                     break;
                 case 2:
                     //System.out.println("Not available yet!");
@@ -329,8 +330,24 @@ public final class Driver {
         } catch (FileNotFoundException e) {
             System.out.println("File not found \n" + e.toString());
         }
-        return m;
-        
+        return m;   
+    }
+
+    private static double[] inputParser(String input) {
+        //[8, 3, 9, 5, 1]
+        ArrayList<Double> mat = new ArrayList<Double>();
+        input = input.substring(input.indexOf("[") + 1, input.length() - 1);
+        while (input.indexOf(",") != -1) {
+            System.out.println(input.indexOf(","));
+            mat.add(Double.parseDouble(input.substring(0, input.indexOf(","))));
+            input = input.substring(input.indexOf(",") + 2, input.length());
+        }
+        mat.add(Double.parseDouble(input));
+        double[] v = new double[mat.size()];
+        for(int i = 0; i < mat.size(); i++) {
+            v[i] = mat.get(i);
+        }
+        return v;
     }
 
 
