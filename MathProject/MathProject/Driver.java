@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -7,11 +8,33 @@ import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+
 /**
  *
  * @author Ben Bohannon
  */
 public final class Driver {
+
+    private static BufferedReader reader;
+
+    private static int getIntInput(int lower, int upper) {
+        boolean validInput = false;
+            String input;
+            int choice = 0;
+            while (!validInput) {
+                try {
+                    input = reader.readLine();
+                    choice = Integer.parseInt(input);
+                    if (choice > upper || choice < lower) {
+                        throw new RuntimeException();
+                    }
+                    validInput = true;
+                } catch(Exception e) {
+                    System.out.println("Invalid input!");
+                }
+            }
+        return choice;
+    }
 
     /**
      * Private constructor to prevent instantiation.
@@ -21,48 +44,222 @@ public final class Driver {
     }
 
     public static void main(String[] args) {
+        reader = new BufferedReader(new InputStreamReader(System.in));
+
+
         System.out.println("Welcome to the Matrix Calculator!\n"
-                + "What would you like to do?");
+                + "What would you like to do?\n");
 
         boolean isFinished = false;
         while (!isFinished) {
-            System.out.println("\n1) Manually enter a Matrix.\n"
-                    + "2) Read Matrices from a txt file.\n"
-                    + "3) Use Hilbert Matrices.\n"
-                    + "4) Exit.\n");
+            System.out.println("1) LU Decomposition\n"
+                    + "2) QR Decomposition\n"
+                    + "3) Solve Ax = b\n"
+                    + "4) Power Method\n"
+                    + "5) Hilbert Matrix Solutions and Error\n"
+                    + "6) Exit\n");
 
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(System.in));
-
-            boolean validInput = false;
-            String input = "";
-            int choice = 0;
-            while (!validInput) {
-                try {
-                    input = reader.readLine();
-                    choice = Integer.parseInt(input);
-                    if (choice > 4 || choice < 0) {
-                        throw new RuntimeException();
-                    }
-                    validInput = true;
-                } catch(Exception e) {
-                    System.out.println("Invalid input!");
-                }
-            }
+            int choice = getIntInput(1, 6);
 
             switch (choice) {
-                case 1:
-                    System.out.print("[0, 1, 2, 3]");
-                    System.out.println(Arrays.toString(inputParser("[0, 1, 2, 3]")));
+                case 1: //LU DECOMPOSITION------------------------------------
+                    System.out.println("Input name of file containing the"
+                            + " Matrix to factorize.");
+                    System.out.println("**Note: The file must be in the"
+                            + " same directory as the Driver.class file**");
+
+                    try {
+                        String path = reader.readLine();
+
+                        //TODO: GET MATRIX FROM FILE HERE.
+                        Matrix A = null;
+
+                        Matrix[] LU = MatrixMath.lu_fact(A);
+
+                        System.out.println("L Matrix:\n" + LU[0]);
+                        System.out.println("U Matrix:\n" + LU[1]);
+
+                        System.out.println("\n LU Error: "
+                                + MatrixMath.maximumNorm(
+                                        LU[0].multiply(LU[1]).subtract(A)));
+
+                    } catch (Exception e) {
+                        System.out.println("Failed to read file.");
+                    }
+
                     break;
-                case 2:
-                    //System.out.println("Not available yet!");
-                    System.out.println(parser(input));
+
+                case 2: //QR DECOMPOSITION-------------------------------------
+                    System.out.println("1) Use Givens\n"
+                            + "2) Use HouseHolder");
+
+                    int choice2 = getIntInput(1, 2);
+
+                    switch(choice2) {
+                        case 1: //GIVENS
+                            System.out.println("Input name of file containing"
+                                    + "the Matrix to decompose.");
+                            System.out.println("**Note: The file must be in the"
+                                    + " same directory as the Driver.class file"
+                                    + "**");
+
+                            try {
+                                String path = reader.readLine();
+
+                                //TODO: GET MATRIX FROM FILE HERE.
+                                Matrix A = null;
+
+                                Matrix[] QR = MatrixMath.qr_fact_givens(A);
+
+                                System.out.println("Q Matrix:\n" + QR[0]);
+                                System.out.println("R Matrix:\n" + QR[1]);
+
+                                System.out.println("\n QR Error: "
+                                + MatrixMath.maximumNorm(
+                                        QR[0].multiply(QR[1]).subtract(A)));
+
+                            } catch (Exception e) {
+                                System.out.println("Failed to read file.");
+                            }
+                            break;
+
+                        case 2: //HOUSEHOLDER
+                            System.out.println("Input name of file containing"
+                                    + "the Matrix to decompose.");
+                            System.out.println("**Note: The file must be in the"
+                                    + " same directory as the Driver.class file"
+                                    + "**");
+
+                            try {
+                                String path = reader.readLine();
+
+                                //TODO: GET MATRIX FROM FILE HERE.
+                                Matrix A = null;
+
+                                Matrix[] QR = MatrixMath.qr_fact_givens(A);
+
+                                System.out.println("Q Matrix:\n" + QR[0]);
+                                System.out.println("R Matrix:\n" + QR[1]);
+
+                                System.out.println("\n QR Error: "
+                                + MatrixMath.maximumNorm(
+                                        QR[0].multiply(QR[1]).subtract(A)));
+
+                            } catch (Exception e) {
+                                System.out.println("Failed to read file.");
+                            }
+                            break;
+                        default:
+                            System.out.println("Something went wrong.");
+                    }
                     break;
-                case 3:
-                    isFinished = doHilbert(reader);
+
+                case 3: //Ax = b--------------------------------------------
+                    System.out.println("1) Solve using LU Decomposition\n"
+                            + "2) Solve using QR Decomposition\n"
+                            + "3) Solve using Jacobi Method\n"
+                            + "4) Solve using Gauss-Seidel Method\n");
+
+                    int choice3 = getIntInput(1, 4);
+
+                    Matrix Ab;
+                    double[] b;
+                    Matrix A;
+                    double[] solution;
+                    
+                    switch (choice3) {
+                        case 1: //LU SOLVE
+                            System.out.println("Input name of file containing"
+                                    + "the augmented Matrix to decompose.");
+                            System.out.println("**Note: The file must be in the"
+                                    + " same directory as the Driver.class file"
+                                    + "**");
+                            
+                            //TODO: GET MATRIX [A|b]
+                            Ab = null;
+                            
+                            //TODO: SPLIT A from b.
+                            b = Ab.getColumn(Ab.getColumns() - 1);
+                            A = new Matrix(Ab.getRows(),
+                                    Ab.getColumns() - 1);
+                            for(int i = 0; i < Ab.getRows(); i++) {
+                                for (int j = 0; j < Ab.getColumns() - 1; j++) {
+                                    A.set(i, j, Ab.get(i, j));
+                                }
+                            }
+                            
+                            Matrix[] LU = MatrixMath.lu_fact(A);
+                            
+                            solution = MatrixMath.solve_lu_b(LU[0], LU[1], b);
+                            
+                            //TODO: FIND ERROR and PRINT IT.
+                            //TODO: PRINT EVERYTHING.
+                            
+                            break;
+                        case 2: //QR SOLVE
+                            System.out.println("Input name of file containing"
+                                    + "the augmented Matrix to decompose.");
+                            System.out.println("**Note: The file must be in the"
+                                    + " same directory as the Driver.class file"
+                                    + "**");
+                            
+                            //TODO: GET MATRIX [A|b]
+                            Ab = null;
+                            
+                            //TODO: SPLIT A from b.
+                            b = Ab.getColumn(Ab.getColumns() - 1);
+                            A = new Matrix(Ab.getRows(),
+                                    Ab.getColumns() - 1);
+                            for(int i = 0; i < Ab.getRows(); i++) {
+                                for (int j = 0; j < Ab.getColumns() - 1; j++) {
+                                    A.set(i, j, Ab.get(i, j));
+                                }
+                            }
+                            
+                            Matrix[] QR = MatrixMath.qr_fact_givens(A);
+                            
+                            solution = MatrixMath.solve_qr_b(QR[0], QR[1], b);
+                            break;
+                        case 3: //JACOBI SOLVE
+                            break;
+                        case 4: //GAUSS-SEIDEL SOLVE
+                            break;
+                        default:
+                            System.out.println("Something went wrong.");
+                    }
                     break;
-                case 4:
+                case 4: //POWER METHOD--------------------------------------
+                    System.out.println("Input name of file containing the"
+                            + " Matrix to calculate.");
+                    System.out.println("**Note: The file must be in the"
+                            + " same directory as the Driver.class file**");
+
+                    try {
+                        String path = reader.readLine();
+
+                        //TODO: GET MATRIX FROM FILE HERE.
+                        A = null;
+
+                        //TODO: GET INITIAL VECTOR
+                        double[] initial = {0};
+
+                        //TODO: GET TOLERANCE
+                        double tol = 0;
+
+                        double[][] powerStuff
+                                = MatrixMath.power_method(A, tol, initial);
+                        //First Array is e-vector. Second is e-value. 3 is iters
+
+
+
+                    } catch (Exception e) {
+                        System.out.println("Failed to read file.");
+                    }
+                    break;
+                case 5:
+                    doHilbert();
+                    break;
+                case 6:
                     isFinished = true;
                     break;
                 default:
@@ -75,7 +272,7 @@ public final class Driver {
 
     }
 
-    private static boolean doHilbert(BufferedReader reader) {
+    private static boolean doHilbert() {
         System.out.println("\nWhat would you like to do with"
                 + " Hilbert Matrices?\n");
 
@@ -84,28 +281,19 @@ public final class Driver {
                 + "2) Create txt file of errors.\n"
                 + "3) Go Back.\n");
 
-        boolean validInput = false;
-        String input;
-        int choice = 0;
-        while (!validInput) {
-            try {
-                input = reader.readLine();
-                choice = Integer.parseInt(input);
-                if (choice > 3 || choice < 0) {
-                    throw new RuntimeException();
-                }
-                validInput = true;
-            } catch(Exception e) {
-                System.out.println("Invalid input!");
-            }
-        }
+        int choice = getIntInput(1, 3);
 
+        int n;
         switch (choice) {
                 case 1:
-                    writeHilbertData();
+                    System.out.println("Input n, max size of Hilbert Matrix");
+                    n = getIntInput(2, Integer.MAX_VALUE - 1);
+                    writeHilbertData(n + 1);
                     return false;
                 case 2:
-                    writeErrorData();
+                    System.out.println("Input n, max size of Hilbert Matrix");
+                    n = getIntInput(2, Integer.MAX_VALUE);
+                    writeErrorData(n + 1);
                     return false;
                 case 3:
                     return false;
@@ -116,13 +304,13 @@ public final class Driver {
         return false;
     }
 
-    private static void writeHilbertData() {
+    private static void writeHilbertData(int n) {
         try {
             PrintWriter writer = new PrintWriter("HilbertOutput.txt", "UTF-8");
 
             System.out.print("Writing..");
 
-            for (int i = 2; i < 21; i++) {
+            for (int i = 2; i < n; i++) {
                 //Print Hilbert Matrix.
                 Matrix h = Matrix.getHilbert(i);
                 writer.println("----- " + i + "x" + i
@@ -169,9 +357,9 @@ public final class Driver {
         }
     }
 
-    private static void writeErrorData() {
+    private static void writeErrorData(int n) {
         try {
-            final int iterations = 21;
+            final int iterations = n;
             PrintWriter writer = new PrintWriter("ErrorOutput.txt", "UTF-8");
 
             System.out.print("Writing..");
@@ -296,7 +484,7 @@ public final class Driver {
             System.out.println("Writing failed!\n" + ex.toString());
         }
     }
-
+    
     private static Matrix parser(String fileName) {
         Matrix m = new Matrix(1, 1);
         try {
@@ -350,12 +538,13 @@ public final class Driver {
         return v;
     }
 
-    public static double[] class xGenerator() {
-        int rand = Math.round(Math.random()*7) + 3;
+    public static double[] xGenerator() {
+        int rand = (int) Math.round(Math.random()*7) + 3;
         double[] x = new double[rand];
         for (int i = 0; i < x.length; i++) {
             x[i] = Math.round(Math.random());
         }
+        return x;
     }
 
 

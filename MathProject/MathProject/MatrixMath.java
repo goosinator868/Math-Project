@@ -392,7 +392,7 @@ public final class MatrixMath {
      * @param vector Vector to calculate.
      * @return Magnitude of the vector.
      */
-    private static double getMagnitude(final double[] vector) {
+    public static double getMagnitude(final double[] vector) {
         double mag = 0;
 
         for (double d : vector) {
@@ -445,7 +445,7 @@ public final class MatrixMath {
     }
 
     public static double[][] jacobi(Matrix mat, double[] b, double[] initial,
-        double tol) {
+        double tol, boolean isBinaryStream) {
 
         //returns tolerance & x
         //make lu and d matrices
@@ -487,10 +487,15 @@ public final class MatrixMath {
         Matrix x;
         do {
             x = dInv.multiply((lu.multiply(xo)).add(bo));
+            if (isBinaryStream) {
+                for (int i = 0; i < x.getRows(); i++) {
+                    x.set(i, 0, Math.abs(x.get(i, 0) % 2));
+                }
+            }
             tolTemp = getMagnitude(x.subtract(xo).getColumn(0));
             count++;
             xo = new Matrix(x);
-            System.out.println(x);
+            //System.out.println(x);
         } while (count < 500 && Math.abs(tolTemp) > tol);
 
         if (count == 500) {
@@ -507,9 +512,12 @@ public final class MatrixMath {
     }
 
     public static double[][] gauss_seidel(Matrix mat, double[] b,
-            double[] initial, double tol) {
+            double[] initial, double tol, boolean isBinaryStream) {
         Matrix ld = findL(mat).add(findD(mat));
         Matrix u = findU(mat);
+        
+//        System.out.println("ld is:\n" + ld);
+//        System.out.println("u is:\n" + u);
 
         //make b a matrix
         double[][] temp2 = new double[b.length][1];
@@ -524,16 +532,14 @@ public final class MatrixMath {
         }
         Matrix xo = new Matrix(temp2);
 
-        Matrix right;
-
         double[] x = new double[b.length];
         int count = 0;
         Matrix x1;
         double tolTemp;
         do {
             //Solve (L+D)x = right
-            right = (u.multiply(xo).add(bo).multiply(-1));
-            count++;
+            Matrix right = (bo.subtract(u.multiply(xo)));
+
             double temp;
             for (int i = 0; i < x.length; i++) {
                 temp = right.get(i, 0);
@@ -551,10 +557,17 @@ public final class MatrixMath {
             }
 
             x1 = new Matrix(temp3);
+            if (isBinaryStream) {
+                for (int i = 0; i < x1.getRows(); i++) {
+                    x1.set(i, 0, x1.get(i, 0) % 2);
+                }
+            }
+            
+            System.out.println(x1);
 
             tolTemp = getMagnitude(x1.subtract(xo).getColumn(0));
             count++;
-            xo = x1;
+            xo = new Matrix(x1);
         } while (count < 500 && tolTemp > tol);
 
         if (count == 500) {
