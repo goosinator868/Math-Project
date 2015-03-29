@@ -48,11 +48,13 @@ public class Matrix {
      * Copy Constructor for a Matrix.
      * @param A Matrix to copy.
      */
-    public Matrix(Matrix A) {
+    public Matrix(final Matrix A) {
         array = new double[A.getRows()][A.getColumns()];
 
         for (int i = 0; i < array.length; i++) {
-            System.arraycopy(A.array[i], 0, array[i], 0, array.length);
+            for (int j = 0; j < array[i].length; j++) {
+                array[i][j] = A.array[i][j];
+            }
         }
     }
 
