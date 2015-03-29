@@ -1,9 +1,11 @@
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
-
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  *
@@ -33,7 +35,7 @@ public final class Driver {
                     new BufferedReader(new InputStreamReader(System.in));
 
             boolean validInput = false;
-            String input;
+            String input = "";
             int choice = 0;
             while (!validInput) {
                 try {
@@ -53,7 +55,8 @@ public final class Driver {
                     System.out.println("Not available yet!");
                     break;
                 case 2:
-                    System.out.println("Not available yet!");
+                    //System.out.println("Not available yet!");
+                    System.out.println(parser(input));
                     break;
                 case 3:
                     isFinished = doHilbert(reader);
@@ -291,6 +294,43 @@ public final class Driver {
         } catch (Exception ex) {
             System.out.println("Writing failed!\n" + ex.toString());
         }
+    }
+
+    private static Matrix parser(String fileName) {
+        Matrix m = new Matrix(1, 1);
+        try {
+            File file = new File(fileName);
+            int r = 1;
+            ArrayList<ArrayList> mat3 = new ArrayList<ArrayList>();
+            double[] mat2;
+            Scanner kb = new Scanner(file);
+            while (kb.hasNextLine()) {
+                String line = kb.nextLine();
+                ArrayList<Double> mat = new ArrayList<Double>();
+                while (line.indexOf(' ') != -1) {
+                    double num = Double.parseDouble(line.substring(0, line.indexOf(' ')));
+                    line = line.substring(line.indexOf(' ') + 1, line.length());
+                    mat.add(num);
+                }
+                double num = Double.parseDouble(line.substring(0, line.length()));
+                mat.add(num);
+                //mat2 = mat.toArray();
+                mat3.add(mat);
+                r++;
+            }
+            double[][] mat4 = new double[r][1];
+            for (int i = 0; i < r; i++) {
+                ArrayList<Double> mat = mat3.get(i);
+                for (int j = 0; j < mat.size(); j++) {
+                    mat4[i][j] = mat.get(j);
+                }
+            }
+            m = new Matrix(mat4);
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found \n" + e.toString());
+        }
+        return m;
+        
     }
 
 

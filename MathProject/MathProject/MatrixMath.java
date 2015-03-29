@@ -289,6 +289,105 @@ public final class MatrixMath {
     }
 
     /**
+     * Encodes the input stream.
+     * @param inputStream
+     * @return The encoded stream.
+     */
+    public static double[] encode(double[] inputStream) {
+
+        Matrix A0 = new Matrix(inputStream.length + 3, inputStream.length + 3);
+        double[] input = new double[inputStream.length + 3];
+
+        for (int i = 0; i < inputStream.length; i++) {
+            input[i] = inputStream[i];
+        }
+
+
+        for (int i = 0; i < A0.getRows(); i++) {
+            A0.set(i, i, 1);
+            if (i - 2 < 0) {
+                A0.set(i, i + A0.getColumns() - 2, 1);
+            } else {
+                A0.set(i, i - 2, 1);
+            }
+            if (i - 3 < 0) {
+                A0.set(i, i + A0.getColumns() - 3, 1);
+            } else {
+                A0.set(i, i - 3, 1);
+            }
+        }
+
+        Matrix A1 = new Matrix(inputStream.length + 3, inputStream.length + 3);
+
+        for (int i = 0; i < A1.getRows(); i++) {
+            A1.set(i, i, 1);
+            if (i - 1 < 0) {
+                A1.set(i, i + A1.getColumns() - 1, 1);
+            } else {
+                A1.set(i, i - 1, 1);
+            }
+            if (i - 3 < 0) {
+                A1.set(i, i + A1.getColumns() - 3, 1);
+            } else {
+                A1.set(i, i - 3, 1);
+            }
+        }
+
+        double[][] temp = new double[input.length][1];
+        for (int i = 0; i < input.length; i++) {
+            temp[i][0] = input[i];
+        }
+        Matrix x = new Matrix(temp);
+
+        Matrix y0 = A0.multiply(x);
+        Matrix y1 = A1.multiply(x);
+
+        double[] encode = new double[y0.getRows()];
+        for (int i = 0; i < y0.getRows(); i++) {
+            encode[i] = 10 * (y0.get(i, 0) % 2) + y1.get(i, 0) % 2;
+        }
+
+        return encode;
+    }
+
+    public static double[][] power_method(Matrix A, double tol,
+            double[] initial) {
+        double[][] returnData = new double[3][];
+        returnData[1] = new double[1]; //EigenValue
+        returnData[2] = new double[1]; //Number of iterations needed.
+
+        //Turn input double[] into a Matrix.
+        double[][] temp = new double[initial.length][1];
+        for (int i = 0; i < initial.length; i++) {
+            temp[i][0] = initial[i];
+        }
+        Matrix x = new Matrix(temp);
+        Matrix xOld;
+        int iterations = 0;
+        do {
+            iterations++;
+            xOld = new Matrix(x);
+
+            Matrix temp2 = A.multiply(x);
+            x = temp2.multiply(1.0 / xOld.get(0, 0));
+
+        } while(iterations < 5000
+                && Math.abs(x.get(0, 0) - xOld.get(0, 0)) > tol);
+
+        if (iterations == 5000) {
+            System.out.println("Power method could not converge within"
+                    + " the given tolerance in <5000 iterations");
+            return null; //If Power method does not converge, return null.
+        }
+
+        returnData[2][0] = iterations;
+        returnData[1][0] = x.get(0, 0);
+        returnData[0] = x.getColumn(0);
+
+        return returnData;
+    }
+
+    /**
      * Gets the magnitude of the input vector.
      * @param vector Vector to calculate.
      * @return Magnitude of the vector.
@@ -302,6 +401,7 @@ public final class MatrixMath {
 
         return java.lang.Math.sqrt(mag);
     }
+
 
     /**
      * Multiplies the input vector v by its transpose, and returns the
@@ -344,7 +444,7 @@ public final class MatrixMath {
         return values;
     }
 
-    public static double[][] jacobi(Matrix mat, double[] b,
+    public static double[][] jacobi(Matrix mat, double[] b, double[] initial,
         double tol) {
 
         //returns tolerance & x
@@ -357,11 +457,15 @@ public final class MatrixMath {
         //inverse of d
         for (int i = 0; i < mat.getRows(); i++) {
             for (int j = 0; j < mat.getColumns(); j++) {
-                if(i == j) {
-                    dInv.set(i, j, 1 / dInv.get(i, j));
+                if (i == j) {
+                    if (dInv.get(i, j) != 0) {
+                        dInv.set(i, j, -1 / dInv.get(i, j));
+                    }
                 }
             }
         }
+
+        //System.out.println("Inverse of D: " + dInv);
 
         //make b a matrix
         double[][] temp = new double[b.length][1];
@@ -370,53 +474,69 @@ public final class MatrixMath {
         }
 
         Matrix bo = new Matrix(temp);
-        Matrix xo = new Matrix(mat.getRows(), 1);
+
+        temp = new double[b.length][1];
+        for (int i = 0; i < b.length; i++) {
+            temp[i][0] = initial[i];
+        }
+        Matrix xo = new Matrix(temp);
+
         //right side of formula
         int count = 0;
+        double tolTemp;
         Matrix x;
         do {
             x = dInv.multiply((lu.multiply(xo)).add(bo));
-            double tolTemp = getMagnitude(x.subtract(xo));
+            tolTemp = getMagnitude(x.subtract(xo).getColumn(0));
             count++;
-            xo = x;
-        } while (tolTemp > tol);
+            xo = new Matrix(x);
+            System.out.println(x);
+        } while (count < 500 && Math.abs(tolTemp) > tol);
 
-        //make matrix x into an array
-        double[][] xFinal = new double[1][x.getRows()];
-        for (int i = 0; i < x.getRows(); i++) {
-            xFinal[0][i] = x.get(i, 0);
+        if (count == 500) {
+            System.out.println("Solution did not converge within the tolerance"
+                    + " in 500 iterations.");
+            return null;
         }
+
         double[] iteration = new double[1];
         iteration[0] = count;
-        double[][] returnVals = {{xFinal}, {count}};
+        double[][] returnVals = {x.getColumn(0), iteration};
 
         return returnVals;
     }
 
     public static double[][] gauss_seidel(Matrix mat, double[] b,
-        double tol) {
+            double[] initial, double tol) {
         Matrix ld = findL(mat).add(findD(mat));
         Matrix u = findU(mat);
 
         //make b a matrix
-        double[][] temp = new double[b.length][1];
+        double[][] temp2 = new double[b.length][1];
         for (int i = 0; i < b.length; i++) {
-            temp[i][0] = b[i];
+            temp2[i][0] = b[i];
         }
+        Matrix bo = new Matrix(temp2);
 
-        Matrix bo = new Matrix(temp);
-        Matrix xo = new Matrix(mat.getRows(), 1);
+        temp2 = new double[b.length][1];
+        for (int i = 0; i < b.length; i++) {
+            temp2[i][0] = initial[i];
+        }
+        Matrix xo = new Matrix(temp2);
 
         Matrix right;
 
         double[] x = new double[b.length];
         int count = 0;
+        Matrix x1;
+        double tolTemp;
         do {
             //Solve (L+D)x = right
-            right = (u.multiply(xo).add(bo));
+            right = (u.multiply(xo).add(bo).multiply(-1));
             count++;
+            double temp;
             for (int i = 0; i < x.length; i++) {
-                double temp = right.get(i, 0);
+                temp = right.get(i, 0);
 
                 for (int k = 0; k < i; k++) {
                     temp -= ld.get(i, k) * x[k];
@@ -424,75 +544,87 @@ public final class MatrixMath {
                 temp /= ld.get(i, i);
                 x[i] = temp;
             }
-            temp = new double[x.length][1];
+
+            double[][] temp3 = new double[x.length][1];
             for (int i = 0; i < x.length; i++) {
-                temp[i][0] = x[i];
+                temp3[i][0] = x[i];
             }
 
-            x = new Matrix(temp);
+            x1 = new Matrix(temp3);
 
-            double tolTemp = getMagnitude(x.subtract(xo));
+            tolTemp = getMagnitude(x1.subtract(xo).getColumn(0));
             count++;
-            xo = x;
-        } while (tolTemp > tol);
+            xo = x1;
+        } while (count < 500 && tolTemp > tol);
 
+        if (count == 500) {
+            System.out.println("Solution did not converge within the tolerance"
+                    + " in 500 iterations.");
+            return null;
+        }
         //make matrix x into an array
-        double[][] xFinal = new double[1][x.getRows()];
-        for (int i = 0; i < x.getRows(); i++) {
-            xFinal[0][i] = x.get(i, 0);
+        double[][] xFinal = new double[1][x1.getRows()];
+        for (int i = 0; i < x1.getRows(); i++) {
+            xFinal[0][i] = x1.get(i, 0);
         }
         double[] iteration = new double[1];
         iteration[0] = count;
-        double[][] returnVals = {{xFinal}, {count}};
+        double[][] returnVals = {xFinal[0], {count}};
 
         return returnVals;
 
     }
 
-    private static Matrix l findL(Matrix mat) {
+    private static Matrix findL(Matrix mat) {
         int row = mat.getRows();
         int col = mat.getColumns();
         Matrix l = new Matrix(mat);
 
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                if (i >= j) {
+                if (i <= j) {
                     l.set(i, j, 0);
                 }
             }
         }
 
+        //System.out.println("L Matrix: " + l);
+
         return l;
     }
 
-    private static Matrix u findU(Matrix mat) {
+    private static Matrix findU(Matrix mat) {
         int row = mat.getRows();
         int col = mat.getColumns();
         Matrix u = new Matrix(mat);
 
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                if (i <= j) {
+                if (i >= j) {
                     u.set(i, j, 0);
                 }
             }
         }
 
+        //System.out.println("U Matrix: " + u);
+
         return u;
     }
 
-    private static Matrix d findD(Matrix mat) {
+    private static Matrix findD(Matrix mat) {
         int row = mat.getRows();
         int col = mat.getColumns();
-        Matrix d = new Matrix(mat);
+        Matrix d = new Matrix(mat.getRows(), mat.getColumns());
 
         for (int i = 0; i < row; i++) {
             for(int j = 0; j <col; j++) {
                 if (i == j) {
-                    d.set(i, j, 0);
+                    d.set(i, j, mat.get(i, j));
                 }
             }
         }
+
+        //System.out.println("D Matrix: " + d);
 
         return d;
     }
