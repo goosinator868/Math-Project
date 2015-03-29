@@ -350,5 +350,13 @@ public final class Driver {
         return v;
     }
 
+    public static double[] class xGenerator() {
+        int rand = Math.round(Math.random()*7) + 3;
+        double[] x = new double[rand];
+        for (int i = 0; i < x.length; i++) {
+            x[i] = Math.round(Math.random());
+        }
+    }
+
 
 }
