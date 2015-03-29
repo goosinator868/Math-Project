@@ -71,8 +71,7 @@ public final class Driver {
                     try {
                         String path = reader.readLine();
 
-                        //TODO: GET MATRIX FROM FILE HERE.
-                        Matrix A = null;
+                        Matrix A = parser(path);
 
                         Matrix[] LU = MatrixMath.lu_fact(A);
 
@@ -85,6 +84,7 @@ public final class Driver {
 
                     } catch (Exception e) {
                         System.out.println("Failed to read file.");
+                        System.out.println(e.toString());
                     }
 
                     break;
@@ -106,8 +106,7 @@ public final class Driver {
                             try {
                                 String path = reader.readLine();
 
-                                //TODO: GET MATRIX FROM FILE HERE.
-                                Matrix A = null;
+                                Matrix A = parser(path);
 
                                 Matrix[] QR = MatrixMath.qr_fact_givens(A);
 
@@ -133,8 +132,7 @@ public final class Driver {
                             try {
                                 String path = reader.readLine();
 
-                                //TODO: GET MATRIX FROM FILE HERE.
-                                Matrix A = null;
+                                Matrix A = parser(path);
 
                                 Matrix[] QR = MatrixMath.qr_fact_givens(A);
 
@@ -166,7 +164,7 @@ public final class Driver {
                     double[] b;
                     Matrix A;
                     double[] solution;
-                    
+
                     switch (choice3) {
                         case 1: //LU SOLVE
                             System.out.println("Input name of file containing"
@@ -174,27 +172,30 @@ public final class Driver {
                             System.out.println("**Note: The file must be in the"
                                     + " same directory as the Driver.class file"
                                     + "**");
-                            
-                            //TODO: GET MATRIX [A|b]
-                            Ab = null;
-                            
-                            //TODO: SPLIT A from b.
-                            b = Ab.getColumn(Ab.getColumns() - 1);
-                            A = new Matrix(Ab.getRows(),
-                                    Ab.getColumns() - 1);
-                            for(int i = 0; i < Ab.getRows(); i++) {
-                                for (int j = 0; j < Ab.getColumns() - 1; j++) {
-                                    A.set(i, j, Ab.get(i, j));
+
+                            try {
+                                String path = reader.readLine();
+                                Ab = parser(path);
+
+                                b = Ab.getColumn(Ab.getColumns() - 1);
+                                A = new Matrix(Ab.getRows(),
+                                        Ab.getColumns() - 1);
+                                for(int i = 0; i < Ab.getRows(); i++) {
+                                    for (int j = 0; j < Ab.getColumns() - 1; j++) {
+                                        A.set(i, j, Ab.get(i, j));
+                                    }
                                 }
+
+                                Matrix[] LU = MatrixMath.lu_fact(A);
+
+                                solution = MatrixMath.solve_lu_b(LU[0], LU[1], b);
+
+                                //TODO: FIND ERROR and PRINT IT.
+                                //TODO: PRINT EVERYTHING.
+                            } catch (Exception e) {
+                                System.out.println("Failed to read file.");
                             }
-                            
-                            Matrix[] LU = MatrixMath.lu_fact(A);
-                            
-                            solution = MatrixMath.solve_lu_b(LU[0], LU[1], b);
-                            
-                            //TODO: FIND ERROR and PRINT IT.
-                            //TODO: PRINT EVERYTHING.
-                            
+
                             break;
                         case 2: //QR SOLVE
                             System.out.println("Input name of file containing"
@@ -202,23 +203,31 @@ public final class Driver {
                             System.out.println("**Note: The file must be in the"
                                     + " same directory as the Driver.class file"
                                     + "**");
-                            
-                            //TODO: GET MATRIX [A|b]
-                            Ab = null;
-                            
-                            //TODO: SPLIT A from b.
-                            b = Ab.getColumn(Ab.getColumns() - 1);
-                            A = new Matrix(Ab.getRows(),
-                                    Ab.getColumns() - 1);
-                            for(int i = 0; i < Ab.getRows(); i++) {
-                                for (int j = 0; j < Ab.getColumns() - 1; j++) {
-                                    A.set(i, j, Ab.get(i, j));
+
+                            try {
+                                String path = reader.readLine();
+
+                                Ab = parser(path);
+
+                                b = Ab.getColumn(Ab.getColumns() - 1);
+                                A = new Matrix(Ab.getRows(),
+                                        Ab.getColumns() - 1);
+                                for(int i = 0; i < Ab.getRows(); i++) {
+                                    for (int j = 0; j < Ab.getColumns() - 1; j++) {
+                                        A.set(i, j, Ab.get(i, j));
+                                    }
                                 }
+
+                                Matrix[] QR = MatrixMath.qr_fact_givens(A);
+
+                                solution = MatrixMath.solve_qr_b(QR[0], QR[1], b);
+                                
+                                //TODO: FIND ERROR and PRINT IT.
+                                //TODO: PRINT EVERYTHING.
+
+                            } catch (Exception e) {
+                                System.out.println("Failed to Read File.");
                             }
-                            
-                            Matrix[] QR = MatrixMath.qr_fact_givens(A);
-                            
-                            solution = MatrixMath.solve_qr_b(QR[0], QR[1], b);
                             break;
                         case 3: //JACOBI SOLVE
                             break;
@@ -237,8 +246,7 @@ public final class Driver {
                     try {
                         String path = reader.readLine();
 
-                        //TODO: GET MATRIX FROM FILE HERE.
-                        A = null;
+                        A = parser(path);
 
                         //TODO: GET INITIAL VECTOR
                         double[] initial = {0};
@@ -484,12 +492,12 @@ public final class Driver {
             System.out.println("Writing failed!\n" + ex.toString());
         }
     }
-    
+
     private static Matrix parser(String fileName) {
-        Matrix m = new Matrix(1, 1);
+        Matrix m = null;
         try {
             File file = new File(fileName);
-            int r = 1;
+            int r = 0;
             ArrayList<ArrayList> mat3 = new ArrayList<ArrayList>();
             double[] mat2;
             Scanner kb = new Scanner(file);
@@ -507,9 +515,10 @@ public final class Driver {
                 mat3.add(mat);
                 r++;
             }
-            double[][] mat4 = new double[r][1];
+            double[][] mat4 = new double[r][];
             for (int i = 0; i < r; i++) {
                 ArrayList<Double> mat = mat3.get(i);
+                mat4[i] = new double[mat.size()];
                 for (int j = 0; j < mat.size(); j++) {
                     mat4[i][j] = mat.get(j);
                 }
@@ -518,7 +527,7 @@ public final class Driver {
         } catch (FileNotFoundException e) {
             System.out.println("File not found \n" + e.toString());
         }
-        return m;   
+        return m;
     }
 
     private static double[] inputParser(String input) {
