@@ -16,7 +16,10 @@ import java.io.FileNotFoundException;
 public final class Driver {
 
     //TODO: ALL of the solving methods do not yet produce data.
-    //TODO: Make encoder/decoder.
+    //TODO: Write code/get data for part 3.
+
+    //TODO: Do writing component for part 1, part 2, part 3.
+    //TODO: Run tests on gauss-seidel and jacobi methods.
 
     private static BufferedReader reader;
 
@@ -204,14 +207,16 @@ public final class Driver {
                                 A = new Matrix(Ab.getRows(),
                                         Ab.getColumns() - 1);
                                 for(int i = 0; i < Ab.getRows(); i++) {
-                                    for (int j = 0; j < Ab.getColumns() - 1; j++) {
+                                    for (int j = 0; j < Ab.getColumns() - 1;
+                                            j++) {
                                         A.set(i, j, Ab.get(i, j));
                                     }
                                 }
 
                                 Matrix[] QR = MatrixMath.qr_fact_givens(A);
 
-                                solution = MatrixMath.solve_qr_b(QR[0], QR[1], b);
+                                solution = MatrixMath.solve_qr_b(QR[0],
+                                        QR[1], b);
 
                                 //TODO: FIND ERROR and PRINT IT.
                                 //TODO: PRINT EVERYTHING.
@@ -353,17 +358,68 @@ public final class Driver {
                     doHilbert();
                     break;
                 case 6: //ENCODER DECODER-----------------------------
-                    System.out.println("1) Generate Random binary stream\n"
-                            + "2) Input binary stream");
+                    try {
+                        System.out.println("Input length of random binary stream.");
 
-                    int choice4 = getIntInput(1, 2);
+                        int len = getIntInput(1, Integer.MAX_VALUE);
 
-                    if (choice4 == 1) {
-                        //Random binary stream
-                        //TODO: Make this.
-                    } else if (choice4 == 2) {
-                        //Input stream
-                        //TODO: Make this.
+                        double[] x = xGenerator(len);
+
+                        System.out.println("Binary stream:\n" + Arrays.toString(x));
+
+                        System.out.println("Press enter to encode.");
+
+                        reader.readLine();
+
+                        double[] y = MatrixMath.encode(x);
+
+                        System.out.println("Encoded stream:\n"
+                                + Arrays.toString(y));
+                        
+                        System.out.println("Press enter to decode.");
+                        
+                        reader.readLine();
+                        
+                        double[] initial = new double[y.length];
+                        for (int i = 0; i < initial.length; i++) {
+                            initial[i] = 1;
+                        }
+                        
+                        for (int i = 0; i < y.length; i++) {
+                            y[i] = (int) y[i] / 10; //Get y0
+                        }
+                        
+                        Matrix A0 = new Matrix(y.length, y.length);
+                        for (int i = 0; i < A0.getRows(); i++) {
+                            A0.set(i, i, 1);
+                            if (i - 2 < 0) {
+                                A0.set(i, i + A0.getColumns() - 2, 1);
+                            } else {
+                                A0.set(i, i - 2, 1);
+                            }
+                            if (i - 3 < 0) {
+                                A0.set(i, i + A0.getColumns() - 3, 1);
+                            } else {
+                                A0.set(i, i - 3, 1);
+                            }
+                        }
+                        
+                        double[][] solutionStuff
+                                = MatrixMath.jacobi(A0, y,
+                                        initial, 1e-8, true);
+                        
+                        double[] sol = new double[solutionStuff[0].length];
+                        for (int i = 0; i < sol.length; i++) {
+                            sol[i] = solutionStuff[0][i];
+                        }
+                        
+                        System.out.println("Solution stream:\n"
+                                + Arrays.toString(sol));
+                        System.out.println("Number of iterations: "
+                                + solutionStuff[1][0]);
+                        
+                    } catch (Exception e) {
+                        System.out.println("Error encoding/decoding.");
                     }
 
                     break;
@@ -453,9 +509,10 @@ public final class Driver {
                     temp2[j][0] = b[j];
                 }
                 writer.println("Solution error: "
-                        + MatrixMath.maximumNorm(
+                        + MatrixMath.getMagnitude(
                                 h.multiply(new Matrix(temp))
-                                 .subtract(new Matrix(temp2))) + "\n");
+                                 .subtract(new Matrix(temp2)).getColumn(0))
+                        + "\n");
             }
 
             writer.close();
@@ -505,9 +562,9 @@ public final class Driver {
                     temp[j][0] = x[j];
                     temp2[j][0] = b[j];
                 }
-                writer.println(MatrixMath.maximumNorm(
+                writer.println(MatrixMath.getMagnitude(
                                 h.multiply(new Matrix(temp))
-                                 .subtract(new Matrix(temp2))));
+                                 .subtract(new Matrix(temp2)).getColumn(0)));
             }
 
             writer.println("\nQR Givens error for increasing n:");
@@ -543,9 +600,9 @@ public final class Driver {
                     temp[j][0] = x[j];
                     temp2[j][0] = b[j];
                 }
-                writer.println(MatrixMath.maximumNorm(
+                writer.println(MatrixMath.getMagnitude(
                                 h.multiply(new Matrix(temp))
-                                 .subtract(new Matrix(temp2))));
+                                 .subtract(new Matrix(temp2)).getColumn(0)));
             }
 
             writer.println("\nQR householder error for increasing n:");
@@ -581,9 +638,9 @@ public final class Driver {
                     temp[j][0] = x[j];
                     temp2[j][0] = b[j];
                 }
-                writer.println(MatrixMath.maximumNorm(
+                writer.println(MatrixMath.getMagnitude(
                                 h.multiply(new Matrix(temp))
-                                 .subtract(new Matrix(temp2))));
+                                 .subtract(new Matrix(temp2)).getColumn(0)));
             }
 
             writer.close();
@@ -681,9 +738,8 @@ public final class Driver {
 //        return v;
     }
 
-    public static double[] xGenerator() {
-        int rand = (int) Math.round(Math.random()*7) + 3;
-        double[] x = new double[rand];
+    public static double[] xGenerator(int n) {
+        double[] x = new double[n];
         for (int i = 0; i < x.length; i++) {
             x[i] = Math.round(Math.random());
         }
