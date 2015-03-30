@@ -15,11 +15,10 @@ import java.io.FileNotFoundException;
  */
 public final class Driver {
 
-    //TODO: ALL of the solving methods do not yet produce data.
     //TODO: Write code/get data for part 3.
+    //TODO: Fix/Test Gauss-Seidel and jacobi methods.
 
     //TODO: Do writing component for part 1, part 2, part 3.
-    //TODO: Run tests on gauss-seidel and jacobi methods.
 
     private static BufferedReader reader;
 
@@ -181,10 +180,29 @@ public final class Driver {
 
                                 solution = MatrixMath.solve_lu_b(LU[0], LU[1], b);
 
-                                //TODO: FIND ERROR and PRINT IT.
-                                //TODO: PRINT EVERYTHING.
-                                System.out.println("Solved Successfully!"
-                                            + "Does not yet print data!");
+                                //Convert solution to a Matrix.
+                                double[][] temp = new double[solution.length][1];
+                                for (int i = 0; i < solution.length; i++) {
+                                    temp[i][0] = solution[i];
+                                }
+                                Matrix sol = new Matrix(temp);
+                                //Convert b vector to Matrix.
+                                temp = new double[b.length][1];
+                                for (int i = 0; i < b.length; i++) {
+                                    temp[i][0] = b[i];
+                                }
+                                Matrix bMat = new Matrix(temp);
+                                
+                                //Print solution
+                                System.out.println("Solution (transpose):\n"
+                                        + Arrays.toString(solution));
+                                
+                                //FIND ERROR and PRINT IT.
+                                System.out.println("Solution error: "
+                                    + MatrixMath.getMagnitude(
+                                            A.multiply(sol)
+                                             .subtract(bMat)
+                                             .getColumn(0)));
 
                             } catch (Exception e) {
                                 System.out.println("Failed to read file.");
@@ -217,11 +235,30 @@ public final class Driver {
 
                                 solution = MatrixMath.solve_qr_b(QR[0],
                                         QR[1], b);
-
-                                //TODO: FIND ERROR and PRINT IT.
-                                //TODO: PRINT EVERYTHING.
-                                System.out.println("Solved Successfully!"
-                                            + "Does not yet print data!");
+                                
+                                //Convert solution to a Matrix.
+                                double[][] temp = new double[solution.length][1];
+                                for (int i = 0; i < solution.length; i++) {
+                                    temp[i][0] = solution[i];
+                                }
+                                Matrix sol = new Matrix(temp);
+                                //Convert b vector to Matrix.
+                                temp = new double[b.length][1];
+                                for (int i = 0; i < b.length; i++) {
+                                    temp[i][0] = b[i];
+                                }
+                                Matrix bMat = new Matrix(temp);
+                                
+                                //Print solution
+                                System.out.println("Solution (transpose):\n"
+                                        + Arrays.toString(solution));
+                                
+                                //FIND ERROR and PRINT IT.
+                                System.out.println("Solution error: "
+                                    + MatrixMath.getMagnitude(
+                                            A.multiply(sol)
+                                             .subtract(bMat)
+                                             .getColumn(0)));
 
                             } catch (Exception e) {
                                 System.out.println("Failed to Read File.");
@@ -260,10 +297,30 @@ public final class Driver {
                                         initial, tol, false);
 
                                 if (info != null) {
-                                    //TODO: FIND ERROR and PRINT IT.
-                                    //TODO: PRINT EVERYTHING.
-                                    System.out.println("Solved Successfully!"
-                                            + "Does not yet print data!");
+                                    solution = info[0];
+                                    //Convert solution to a Matrix.
+                                    double[][] temp = new double[solution.length][1];
+                                    for (int i = 0; i < solution.length; i++) {
+                                        temp[i][0] = solution[i];
+                                    }
+                                    Matrix sol = new Matrix(temp);
+                                    //Convert b vector to Matrix.
+                                    temp = new double[b.length][1];
+                                    for (int i = 0; i < b.length; i++) {
+                                        temp[i][0] = b[i];
+                                    }
+                                    Matrix bMat = new Matrix(temp);
+
+                                    //Print solution
+                                    System.out.println("Solution (transpose):\n"
+                                            + Arrays.toString(solution));
+
+                                    //FIND ERROR and PRINT IT.
+                                    System.out.println("Solution error: "
+                                        + MatrixMath.getMagnitude(
+                                                A.multiply(sol)
+                                                 .subtract(bMat)
+                                                 .getColumn(0)));
                                 }
 
                             } catch (Exception e) {
@@ -303,10 +360,30 @@ public final class Driver {
                                         initial, tol, false);
 
                                 if (info != null) {
-                                    //TODO: FIND ERROR and PRINT IT.
-                                    //TODO: PRINT EVERYTHING.
-                                    System.out.println("Solved Successfully!"
-                                            + "Does not yet print data!");
+                                    solution = info[0];
+                                    //Convert solution to a Matrix.
+                                    double[][] temp = new double[solution.length][1];
+                                    for (int i = 0; i < solution.length; i++) {
+                                        temp[i][0] = solution[i];
+                                    }
+                                    Matrix sol = new Matrix(temp);
+                                    //Convert b vector to Matrix.
+                                    temp = new double[b.length][1];
+                                    for (int i = 0; i < b.length; i++) {
+                                        temp[i][0] = b[i];
+                                    }
+                                    Matrix bMat = new Matrix(temp);
+
+                                    //Print solution
+                                    System.out.println("Solution (transpose):\n"
+                                            + Arrays.toString(solution));
+
+                                    //FIND ERROR and PRINT IT.
+                                    System.out.println("Solution error: "
+                                        + MatrixMath.getMagnitude(
+                                                A.multiply(sol)
+                                                 .subtract(bMat)
+                                                 .getColumn(0)));
                                 }
                             } catch (Exception e) {
                                 System.out.println("Failed to Read File.");
