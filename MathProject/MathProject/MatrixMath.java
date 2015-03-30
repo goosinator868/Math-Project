@@ -1,7 +1,7 @@
 
 /**
  *
- * @author Ben Bohannon
+ * @author Ben Bohannon and Sydney Young
  */
 public final class MatrixMath {
 
@@ -563,7 +563,7 @@ public final class MatrixMath {
                 }
             }
             
-            System.out.println(x1);
+            //System.out.println(x1);
 
             tolTemp = getMagnitude(x1.subtract(xo).getColumn(0));
             count++;

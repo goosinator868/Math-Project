@@ -11,30 +11,14 @@ import java.io.FileNotFoundException;
 
 /**
  *
- * @author Ben Bohannon
+ * @author Ben Bohannon and Sydney Young
  */
 public final class Driver {
 
-    private static BufferedReader reader;
+    //TODO: ALL of the solving methods do not yet produce data.
+    //TODO: Make encoder/decoder.
 
-    private static int getIntInput(int lower, int upper) {
-        boolean validInput = false;
-            String input;
-            int choice = 0;
-            while (!validInput) {
-                try {
-                    input = reader.readLine();
-                    choice = Integer.parseInt(input);
-                    if (choice > upper || choice < lower) {
-                        throw new RuntimeException();
-                    }
-                    validInput = true;
-                } catch(Exception e) {
-                    System.out.println("Invalid input!");
-                }
-            }
-        return choice;
-    }
+    private static BufferedReader reader;
 
     /**
      * Private constructor to prevent instantiation.
@@ -57,9 +41,10 @@ public final class Driver {
                     + "3) Solve Ax = b\n"
                     + "4) Power Method\n"
                     + "5) Hilbert Matrix Solutions and Error\n"
-                    + "6) Exit\n");
+                    + "6) Encoder/Decoder\n"
+                    + "7) Exit\n");
 
-            int choice = getIntInput(1, 6);
+            int choice = getIntInput(1, 7);
 
             switch (choice) {
                 case 1: //LU DECOMPOSITION------------------------------------
@@ -156,9 +141,12 @@ public final class Driver {
                     System.out.println("1) Solve using LU Decomposition\n"
                             + "2) Solve using QR Decomposition\n"
                             + "3) Solve using Jacobi Method\n"
-                            + "4) Solve using Gauss-Seidel Method\n");
+                            + "4) Solve using Gauss-Seidel Method\n"
+                            + "5) Go Back");
+                    System.out.println("NOTE: These methods need an augmented "
+                            + "matrix in order to function.\n");
 
-                    int choice3 = getIntInput(1, 4);
+                    int choice3 = getIntInput(1, 5);
 
                     Matrix Ab;
                     double[] b;
@@ -192,6 +180,9 @@ public final class Driver {
 
                                 //TODO: FIND ERROR and PRINT IT.
                                 //TODO: PRINT EVERYTHING.
+                                System.out.println("Solved Successfully!"
+                                            + "Does not yet print data!");
+
                             } catch (Exception e) {
                                 System.out.println("Failed to read file.");
                             }
@@ -221,17 +212,103 @@ public final class Driver {
                                 Matrix[] QR = MatrixMath.qr_fact_givens(A);
 
                                 solution = MatrixMath.solve_qr_b(QR[0], QR[1], b);
-                                
+
                                 //TODO: FIND ERROR and PRINT IT.
                                 //TODO: PRINT EVERYTHING.
+                                System.out.println("Solved Successfully!"
+                                            + "Does not yet print data!");
 
                             } catch (Exception e) {
                                 System.out.println("Failed to Read File.");
                             }
                             break;
                         case 3: //JACOBI SOLVE
+                            System.out.println("Input name of file containing"
+                                    + "the augmented Matrix to decompose.");
+                            System.out.println("**Note: The file must be in the"
+                                    + " same directory as the Driver.class file"
+                                    + "**");
+
+                            try {
+                                String path = reader.readLine();
+
+                                Ab = parser(path);
+
+                                b = Ab.getColumn(Ab.getColumns() - 1);
+                                A = new Matrix(Ab.getRows(),
+                                        Ab.getColumns() - 1);
+                                for (int i = 0; i < Ab.getRows(); i++) {
+                                    for (int j = 0; j < Ab.getColumns() - 1;
+                                            j++) {
+                                        A.set(i, j, Ab.get(i, j));
+                                    }
+                                }
+                                System.out.println("Input initial "
+                                        + "guess vector");
+                                double[] initial = vectorParser(A.getRows());
+
+                                System.out.println("Input error tolerance.");
+                                double tol = getDoubleInput(false);
+
+
+                                double[][] info = MatrixMath.jacobi(A, b,
+                                        initial, tol, false);
+
+                                if (info != null) {
+                                    //TODO: FIND ERROR and PRINT IT.
+                                    //TODO: PRINT EVERYTHING.
+                                    System.out.println("Solved Successfully!"
+                                            + "Does not yet print data!");
+                                }
+
+                            } catch (Exception e) {
+                                System.out.println("Failed to Read File.");
+                            }
                             break;
                         case 4: //GAUSS-SEIDEL SOLVE
+                            System.out.println("Input name of file containing"
+                                    + "the augmented Matrix to decompose.");
+                            System.out.println("**Note: The file must be in the"
+                                    + " same directory as the Driver.class file"
+                                    + "**");
+
+                            try {
+                                String path = reader.readLine();
+
+                                Ab = parser(path);
+
+                                b = Ab.getColumn(Ab.getColumns() - 1);
+                                A = new Matrix(Ab.getRows(),
+                                        Ab.getColumns() - 1);
+                                for (int i = 0; i < Ab.getRows(); i++) {
+                                    for (int j = 0; j < Ab.getColumns() - 1;
+                                            j++) {
+                                        A.set(i, j, Ab.get(i, j));
+                                    }
+                                }
+                                System.out.println("Input initial "
+                                        + "guess vector");
+                                double[] initial = vectorParser(A.getRows());
+
+                                System.out.println("Input error tolerance.");
+                                double tol = getDoubleInput(false);
+
+
+                                double[][] info = MatrixMath.gauss_seidel(A, b,
+                                        initial, tol, false);
+
+                                if (info != null) {
+                                    //TODO: FIND ERROR and PRINT IT.
+                                    //TODO: PRINT EVERYTHING.
+                                    System.out.println("Solved Successfully!"
+                                            + "Does not yet print data!");
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Failed to Read File.");
+                            }
+
+                            break;
+                        case 5:
                             break;
                         default:
                             System.out.println("Something went wrong.");
@@ -248,26 +325,49 @@ public final class Driver {
 
                         A = parser(path);
 
-                        //TODO: GET INITIAL VECTOR
-                        double[] initial = {0};
+                        System.out.println("Input initial "
+                                        + "eigenvector guess");
+                        double[] initial = vectorParser(A.getRows());
 
-                        //TODO: GET TOLERANCE
-                        double tol = 0;
+                        System.out.println("Input error tolerance.");
+                        double tol = getDoubleInput(false);
 
                         double[][] powerStuff
                                 = MatrixMath.power_method(A, tol, initial);
-                        //First Array is e-vector. Second is e-value. 3 is iters
 
+                        if (powerStuff != null) {
+                            System.out.println("Eigenvector (transpose):"
+                                    + Arrays.toString(powerStuff[0]));
+                            System.out.println("Eigenvalue: "
+                                    + powerStuff[1][0]);
+                            System.out.println("Number of iterations "
+                                    + powerStuff[2][0]);
+                        }
 
 
                     } catch (Exception e) {
                         System.out.println("Failed to read file.");
                     }
                     break;
-                case 5:
+                case 5: //HILBERT MATRIX THINGS-----------------------
                     doHilbert();
                     break;
-                case 6:
+                case 6: //ENCODER DECODER-----------------------------
+                    System.out.println("1) Generate Random binary stream\n"
+                            + "2) Input binary stream");
+
+                    int choice4 = getIntInput(1, 2);
+
+                    if (choice4 == 1) {
+                        //Random binary stream
+                        //TODO: Make this.
+                    } else if (choice4 == 2) {
+                        //Input stream
+                        //TODO: Make this.
+                    }
+
+                    break;
+                case 7: //QUIT----------------------------------------
                     isFinished = true;
                     break;
                 default:
@@ -505,11 +605,13 @@ public final class Driver {
                 String line = kb.nextLine();
                 ArrayList<Double> mat = new ArrayList<Double>();
                 while (line.indexOf(' ') != -1) {
-                    double num = Double.parseDouble(line.substring(0, line.indexOf(' ')));
+                    double num = Double.parseDouble(line.substring(0,
+                            line.indexOf(' ')));
                     line = line.substring(line.indexOf(' ') + 1, line.length());
                     mat.add(num);
                 }
-                double num = Double.parseDouble(line.substring(0, line.length()));
+                double num = Double.parseDouble(line.substring(0,
+                        line.length()));
                 mat.add(num);
                 //mat2 = mat.toArray();
                 mat3.add(mat);
@@ -530,21 +632,53 @@ public final class Driver {
         return m;
     }
 
-    private static double[] inputParser(String input) {
-        //[8, 3, 9, 5, 1]
-        ArrayList<Double> mat = new ArrayList<Double>();
-        input = input.substring(input.indexOf("[") + 1, input.length() - 1);
-        while (input.indexOf(",") != -1) {
-            System.out.println(input.indexOf(","));
-            mat.add(Double.parseDouble(input.substring(0, input.indexOf(","))));
-            input = input.substring(input.indexOf(",") + 2, input.length());
+    private static double[] vectorParser(int size) {
+
+        double[] vector = new double[size];
+        int current = 0;
+        while (current < size) {
+            try {
+                System.out.println("Input " + (size - current) + " numbers,"
+                        + " divided by spaces.");
+                String input = reader.readLine();
+
+                int i = 0;
+                String num = "";
+                while (i < input.length() && current < size) {
+                    char nextChar = input.charAt(i);
+                    if (nextChar == '.' || Character.isDigit(nextChar)) {
+                        num += nextChar;
+                    } else if (nextChar == ' ' || nextChar == '\n') {
+                        vector[current++] = Double.parseDouble(num);
+                        num = "";
+                    }
+                    i++;
+                }
+                if (!num.equals("")) {
+                    vector[current++] = Double.parseDouble(num);
+                    num = "";
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid data entered.");
+            }
         }
-        mat.add(Double.parseDouble(input));
-        double[] v = new double[mat.size()];
-        for(int i = 0; i < mat.size(); i++) {
-            v[i] = mat.get(i);
-        }
-        return v;
+
+        return vector;
+
+//        //[8, 3, 9, 5, 1]
+//        ArrayList<Double> mat = new ArrayList<Double>();
+//        input = input.substring(input.indexOf("[") + 1, input.length() - 1);
+//        while (input.indexOf(",") != -1) {
+//            System.out.println(input.indexOf(","));
+//            mat.add(Double.parseDouble(input.substring(0, input.indexOf(","))));
+//            input = input.substring(input.indexOf(",") + 2, input.length());
+//        }
+//        mat.add(Double.parseDouble(input));
+//        double[] v = new double[mat.size()];
+//        for(int i = 0; i < mat.size(); i++) {
+//            v[i] = mat.get(i);
+//        }
+//        return v;
     }
 
     public static double[] xGenerator() {
@@ -554,6 +688,44 @@ public final class Driver {
             x[i] = Math.round(Math.random());
         }
         return x;
+    }
+
+    private static int getIntInput(int lower, int upper) {
+        boolean validInput = false;
+            String input;
+            int choice = 0;
+            while (!validInput) {
+                try {
+                    input = reader.readLine();
+                    choice = Integer.parseInt(input);
+                    if (choice > upper || choice < lower) {
+                        throw new RuntimeException();
+                    }
+                    validInput = true;
+                } catch(Exception e) {
+                    System.out.println("Invalid input!");
+                }
+            }
+        return choice;
+    }
+
+    private static double getDoubleInput(boolean allowNegative) {
+        String input;
+        double data = 0;
+        boolean validInput = false;
+        while (!validInput) {
+            try {
+                input = reader.readLine();
+                data = Double.parseDouble(input);
+                if (!allowNegative && data < 0) {
+                    throw new Exception("No negatives");
+                }
+                validInput = true;
+            } catch (Exception e) {
+                System.out.println("Invalid input!");
+            }
+        }
+        return data;
     }
 
 
