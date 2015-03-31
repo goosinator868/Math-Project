@@ -299,6 +299,26 @@ public class Matrix {
         return finalString;
     }
 
+    public final String toString(boolean shorten) {
+        if (shorten) {
+            String finalString = "";
+
+            for (int i = 0; i < this.getRows(); i++) {
+                String rowString = "[ ";
+                for (int j = 0; j < this.getColumns(); j++) {
+                    //rowString += (array[i][j] + ", ");
+                    rowString += (String.format("%.7g", array[i][j]) + ", ");
+                }
+                rowString += "]\n";
+                finalString += rowString;
+            }
+
+            return finalString;
+        } else {
+            return toString();
+        }
+    }
+
     /**
      * Gets a square Identity Matrix of size n by n.
      * @param n Dimension of Matrix.
