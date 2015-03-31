@@ -305,14 +305,10 @@ public final class MatrixMath {
 
         for (int i = 0; i < A0.getRows(); i++) {
             A0.set(i, i, 1);
-            if (i - 2 < 0) {
-                A0.set(i, i + A0.getColumns() - 2, 1);
-            } else {
+            if (i - 2 > 0) {
                 A0.set(i, i - 2, 1);
             }
-            if (i - 3 < 0) {
-                A0.set(i, i + A0.getColumns() - 3, 1);
-            } else {
+            if (i - 3 > 0) {
                 A0.set(i, i - 3, 1);
             }
         }
@@ -321,14 +317,10 @@ public final class MatrixMath {
 
         for (int i = 0; i < A1.getRows(); i++) {
             A1.set(i, i, 1);
-            if (i - 1 < 0) {
-                A1.set(i, i + A1.getColumns() - 1, 1);
-            } else {
+            if (i - 1 > 0) {
                 A1.set(i, i - 1, 1);
             }
-            if (i - 3 < 0) {
-                A1.set(i, i + A1.getColumns() - 3, 1);
-            } else {
+            if (i - 3 > 0) {
                 A1.set(i, i - 3, 1);
             }
         }
@@ -453,15 +445,10 @@ public final class MatrixMath {
         Matrix d = findD(mat);
         Matrix dInv = new Matrix(d);
 
-
         //inverse of d
         for (int i = 0; i < mat.getRows(); i++) {
-            for (int j = 0; j < mat.getColumns(); j++) {
-                if (i == j) {
-                    if (dInv.get(i, j) != 0) {
-                        dInv.set(i, j, -1 / dInv.get(i, j));
-                    }
-                }
+            if (d.get(i, i) != 0) {
+                dInv.set(i, i, 1 / d.get(i, i));
             }
         }
 
@@ -480,19 +467,25 @@ public final class MatrixMath {
             temp[i][0] = initial[i];
         }
         Matrix xo = new Matrix(temp);
-
+        Matrix xBin = null;
+        Matrix xoBin = new Matrix(temp);
         //right side of formula
         int count = 0;
         double tolTemp;
         Matrix x;
         do {
-            x = dInv.multiply((lu.multiply(xo)).add(bo));
+            x = dInv.multiply(bo.subtract(lu.multiply(xo)));
             if (isBinaryStream) {
+                xBin = new Matrix(x);
                 for (int i = 0; i < x.getRows(); i++) {
-                    x.set(i, 0, Math.abs(x.get(i, 0) % 2));
+                    xBin.set(i, 0, Math.abs( x.get(i, 0) % 2.0));
                 }
+                tolTemp = getMagnitude(xBin.subtract(xoBin).getColumn(0));
+                xoBin = new Matrix(xBin);
+                //System.out.println(xBin);
+            } else {
+                tolTemp = getMagnitude(x.subtract(xo).getColumn(0));
             }
-            tolTemp = getMagnitude(x.subtract(xo).getColumn(0));
             count++;
             xo = new Matrix(x);
             //System.out.println(x);
@@ -502,6 +495,10 @@ public final class MatrixMath {
             System.out.println("Solution did not converge within the tolerance"
                     + " in 500 iterations.");
             return null;
+        }
+        
+        if (isBinaryStream) {
+            x = xBin;
         }
 
         double[] iteration = new double[1];
@@ -515,7 +512,7 @@ public final class MatrixMath {
             double[] initial, double tol, boolean isBinaryStream) {
         Matrix ld = findL(mat).add(findD(mat));
         Matrix u = findU(mat);
-        
+
 //        System.out.println("ld is:\n" + ld);
 //        System.out.println("u is:\n" + u);
 
@@ -549,6 +546,9 @@ public final class MatrixMath {
                 }
                 temp /= ld.get(i, i);
                 x[i] = temp;
+                if (isBinaryStream) {
+                    x[i] = Math.abs(x[i]) % 2;
+                }
             }
 
             double[][] temp3 = new double[x.length][1];
@@ -557,12 +557,12 @@ public final class MatrixMath {
             }
 
             x1 = new Matrix(temp3);
-            if (isBinaryStream) {
-                for (int i = 0; i < x1.getRows(); i++) {
-                    x1.set(i, 0, x1.get(i, 0) % 2);
-                }
-            }
-            
+//            if (isBinaryStream) {
+//                for (int i = 0; i < x1.getRows(); i++) {
+//                    x1.set(i, 0, Math.abs(x1.get(i, 0) % 2));
+//                }
+//            }
+
             //System.out.println(x1);
 
             tolTemp = getMagnitude(x1.subtract(xo).getColumn(0));
@@ -630,11 +630,7 @@ public final class MatrixMath {
         Matrix d = new Matrix(mat.getRows(), mat.getColumns());
 
         for (int i = 0; i < row; i++) {
-            for(int j = 0; j <col; j++) {
-                if (i == j) {
-                    d.set(i, j, mat.get(i, j));
-                }
-            }
+             d.set(i, i, mat.get(i, i));
         }
 
         //System.out.println("D Matrix: " + d);

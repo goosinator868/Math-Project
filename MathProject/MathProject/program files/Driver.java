@@ -192,11 +192,11 @@ public final class Driver {
                                     temp[i][0] = b[i];
                                 }
                                 Matrix bMat = new Matrix(temp);
-                                
+
                                 //Print solution
                                 System.out.println("Solution (transpose):\n"
                                         + Arrays.toString(solution));
-                                
+
                                 //FIND ERROR and PRINT IT.
                                 System.out.println("Solution error: "
                                     + MatrixMath.getMagnitude(
@@ -235,7 +235,7 @@ public final class Driver {
 
                                 solution = MatrixMath.solve_qr_b(QR[0],
                                         QR[1], b);
-                                
+
                                 //Convert solution to a Matrix.
                                 double[][] temp = new double[solution.length][1];
                                 for (int i = 0; i < solution.length; i++) {
@@ -248,11 +248,11 @@ public final class Driver {
                                     temp[i][0] = b[i];
                                 }
                                 Matrix bMat = new Matrix(temp);
-                                
+
                                 //Print solution
                                 System.out.println("Solution (transpose):\n"
                                         + Arrays.toString(solution));
-                                
+
                                 //FIND ERROR and PRINT IT.
                                 System.out.println("Solution error: "
                                     + MatrixMath.getMagnitude(
@@ -299,7 +299,8 @@ public final class Driver {
                                 if (info != null) {
                                     solution = info[0];
                                     //Convert solution to a Matrix.
-                                    double[][] temp = new double[solution.length][1];
+                                    double[][] temp
+                                            = new double[solution.length][1];
                                     for (int i = 0; i < solution.length; i++) {
                                         temp[i][0] = solution[i];
                                     }
@@ -435,68 +436,25 @@ public final class Driver {
                     doHilbert();
                     break;
                 case 6: //ENCODER DECODER-----------------------------
-                    try {
-                        System.out.println("Input length of random binary stream.");
 
-                        int len = getIntInput(1, Integer.MAX_VALUE);
+                    System.out.println("1) Use Jacobi\n"
+                            + "2) Use Gauss Seidel\n"
+                            + "3) Go Back");
 
-                        double[] x = xGenerator(len);
+                    int choice4 = getIntInput(1, 3);
 
-                        System.out.println("Binary stream:\n" + Arrays.toString(x));
-
-                        System.out.println("Press enter to encode.");
-
-                        reader.readLine();
-
-                        double[] y = MatrixMath.encode(x);
-
-                        System.out.println("Encoded stream:\n"
-                                + Arrays.toString(y));
-                        
-                        System.out.println("Press enter to decode.");
-                        
-                        reader.readLine();
-                        
-                        double[] initial = new double[y.length];
-                        for (int i = 0; i < initial.length; i++) {
-                            initial[i] = 1;
-                        }
-                        
-                        for (int i = 0; i < y.length; i++) {
-                            y[i] = (int) y[i] / 10; //Get y0
-                        }
-                        
-                        Matrix A0 = new Matrix(y.length, y.length);
-                        for (int i = 0; i < A0.getRows(); i++) {
-                            A0.set(i, i, 1);
-                            if (i - 2 < 0) {
-                                A0.set(i, i + A0.getColumns() - 2, 1);
-                            } else {
-                                A0.set(i, i - 2, 1);
-                            }
-                            if (i - 3 < 0) {
-                                A0.set(i, i + A0.getColumns() - 3, 1);
-                            } else {
-                                A0.set(i, i - 3, 1);
-                            }
-                        }
-                        
-                        double[][] solutionStuff
-                                = MatrixMath.jacobi(A0, y,
-                                        initial, 1e-8, true);
-                        
-                        double[] sol = new double[solutionStuff[0].length];
-                        for (int i = 0; i < sol.length; i++) {
-                            sol[i] = solutionStuff[0][i];
-                        }
-                        
-                        System.out.println("Solution stream:\n"
-                                + Arrays.toString(sol));
-                        System.out.println("Number of iterations: "
-                                + solutionStuff[1][0]);
-                        
-                    } catch (Exception e) {
-                        System.out.println("Error encoding/decoding.");
+                    switch (choice4) {
+                        case 1:
+                            jacobiEncode();
+                            break;
+                        case 2:
+                            gaussSeidelEncode();
+                            break;
+                        case 3:
+                            break;
+                        default:
+                            System.out.println("Something went wrong.");
+                            break;
                     }
 
                     break;
@@ -596,6 +554,130 @@ public final class Driver {
             System.out.println("Done writing! Output to HilbertOutput.txt");
         } catch (Exception ex) {
             System.out.println("Writing failed!\n" + ex.toString());
+        }
+    }
+
+    private static void gaussSeidelEncode() {
+        try {
+            System.out.println("Input length of random binary stream.");
+
+            int len = getIntInput(1, Integer.MAX_VALUE);
+
+            double[] x = xGenerator(len);
+
+            System.out.println("Binary stream:\n" + Arrays.toString(x));
+
+            System.out.println("Press enter to encode.");
+
+            reader.readLine();
+
+            double[] y = MatrixMath.encode(x);
+
+            System.out.println("Encoded stream:\n"
+                    + Arrays.toString(y));
+
+            System.out.println("Press enter to decode.");
+
+            reader.readLine();
+
+            double[] initial = new double[y.length];
+            for (int i = 0; i < initial.length; i++) {
+                initial[i] = 1;
+            }
+
+            for (int i = 0; i < y.length; i++) {
+                y[i] = (int) y[i] / 10; //Get y0
+            }
+
+            Matrix A0 = new Matrix(y.length, y.length);
+            for (int i = 0; i < A0.getRows(); i++) {
+                A0.set(i, i, 1);
+                if (i - 2 > 0) {
+                    A0.set(i, i - 2, 1);
+                }
+                if (i - 3 > 0) {
+                    A0.set(i, i - 3, 1);
+                }
+            }
+
+            double[][] solutionStuff
+                    = MatrixMath.gauss_seidel(A0, y,
+                            initial, 1e-9, true);
+
+            double[] sol = new double[solutionStuff[0].length - 3];
+            for (int i = 0; i < sol.length; i++) {
+                sol[i] = solutionStuff[0][i];
+            }
+
+            System.out.println("Solution stream:\n"
+                    + Arrays.toString(sol));
+            System.out.println("Number of iterations: "
+                    + solutionStuff[1][0]);
+
+        } catch (Exception e) {
+            System.out.println("Error encoding/decoding.");
+        }
+    }
+
+    private static void jacobiEncode() {
+        try {
+            System.out.println("Input length of random binary stream.");
+
+            int len = getIntInput(1, Integer.MAX_VALUE);
+
+            double[] x = xGenerator(len);
+
+            System.out.println("Binary stream:\n" + Arrays.toString(x));
+
+            System.out.println("Press enter to encode.");
+
+            reader.readLine();
+
+            double[] y = MatrixMath.encode(x);
+
+            System.out.println("Encoded stream:\n"
+                    + Arrays.toString(y));
+
+            System.out.println("Press enter to decode.");
+
+            reader.readLine();
+
+            double[] initial = new double[y.length];
+            for (int i = 0; i < initial.length; i++) {
+                initial[i] = 1;
+            }
+
+            for (int i = 0; i < y.length; i++) {
+                y[i] = (int) y[i] / 10; //Get y0
+            }
+
+            Matrix A0 = new Matrix(y.length, y.length);
+            for (int i = 0; i < A0.getRows(); i++) {
+                A0.set(i, i, 1);
+                if (i - 2 > 0) {
+                    A0.set(i, i - 2, 1);
+                }
+                if (i - 3 > 0) {
+                    A0.set(i, i - 3, 1);
+                }
+            }
+
+            double[][] solutionStuff
+                    = MatrixMath.jacobi(A0, y,
+                            initial, 1e-9, true);
+
+            double[] sol = new double[solutionStuff[0].length - 3];
+            for (int i = 0; i < sol.length; i++) {
+                sol[i] = solutionStuff[0][i];
+            }
+
+            System.out.println("Solution stream:\n"
+                    + Arrays.toString(sol));
+            System.out.println("Number of iterations: "
+                    + solutionStuff[1][0]);
+
+        } catch (Exception e) {
+            System.out.println("Error encoding/decoding.");
         }
     }
 
