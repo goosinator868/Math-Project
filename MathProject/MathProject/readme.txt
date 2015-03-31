@@ -96,7 +96,8 @@
 		decompositions, iterative methods, solving methods, and encoding methods needed for the project.
 		**The functions are named according to the project description.**
 
-
+	-The code for the calculations of part 3 of the project description can be found in the test file
+		"LeslieMatrixCalc," if needed.
 
 
 
