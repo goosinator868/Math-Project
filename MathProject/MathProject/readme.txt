@@ -1,9 +1,10 @@
 
 -----Table of Contents-----
 	1. System Requirements
-	2. How to Run
-	3. Where is...?
+	2. How to run the program
+	3. Where is ___ in the program?
 	4. How to input data
+	5. Where is code?
 
 
 
@@ -16,7 +17,7 @@
 		
 	
 	
-2. ---------------How to Run-------------------------
+2. ---------------How to Run the Program-------------------------
 
 	-In the Program Files folder, there are three class files which are the entirety of the program
 		(Driver.class, Matrix.class, MatrixMath.class).
@@ -36,7 +37,7 @@
 		-Only files that use spaces between Matrix entries can be read.
 
 
-3. ---------------Where is...?-----------------------
+3. ---------------Where is __ in the Program?-----------------------
 
 	-LU Decomposition is the first option available to the user.
 
@@ -65,6 +66,9 @@
 
 4. ---------------How to Input Data------------------
 
+	-When navigating the menus of the program, the user need only enter one of the numbers shown to
+		select that option.
+
 	-When prompted for a file, the user must place the file containing the Matrix into the same folder
 		as the Driver.class file, so that it may be found by the program. Then its full name must be
 		input, i.e. "a.dat" "MatrixA.txt" "file.extension"
@@ -74,6 +78,26 @@
 		the user will be prompted for the rest.
 		
 	-If the user is prompted for a tolerance or length of a vector, he/she need only input the number.
+
+
+5. ---------------Where is code?---------------------
+
+	-The Driver class mainly contains parsers, input readers, and general functions that allow the
+		user to interact with the program and see the program's output.
+		**Error is always calculated with the outputs of the MatrixMath class inside of the Driver,
+			however, so the functions within Driver have been named according to their function,
+			so LU decomp/Power Method/etc. may easily be found.**
+	
+	-The Matrix class only contains functions and data for a general Matrix object, such as the addition,
+		subtraction, multiplication, and transposing of Matrices. It does contain the code for generating
+		a Hilbert Matrix, however.
+		
+	-The MatrixMath class contains the bulk of the "thinking" of the program. It performs all of the
+		decompositions, iterative methods, solving methods, and encoding methods needed for the project.
+		**The functions are named according to the project description.**
+
+
+
 
 
 
