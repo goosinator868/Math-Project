@@ -52,9 +52,10 @@ public final class Driver {
 
                 case 2: //QR DECOMPOSITION-------------------------------------
                     System.out.println("1) Use Givens\n"
-                            + "2) Use HouseHolder");
+                            + "2) Use HouseHolder\n"
+                            + "3) Go back");
 
-                    int choice2 = getIntInput(1, 2);
+                    int choice2 = getIntInput(1, 3);
 
                     switch(choice2) {
                         case 1: //GIVENS
@@ -63,6 +64,8 @@ public final class Driver {
 
                         case 2: //HOUSEHOLDER
                             doHouseHolder();
+                            break;
+                        case 3:
                             break;
                         default:
                             System.out.println("Something went wrong.");
